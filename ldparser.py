@@ -449,11 +449,41 @@ def read_ldfile(f_):
     return head_, chans
 
 
+# if __name__ == '__main__':
+#     """ Small test of the parser.
+    
+#     Decodes all ld files in the directory. For each file, creates 
+#     a plot for data with the same sample frequency.  
+#     """
+
+#     import sys, os, glob
+#     from itertools import groupby
+#     import pandas as pd
+#     import matplotlib.pyplot as plt
+
+#     if len(sys.argv)!=2:
+#         print("Usage: ldparser.py /some/path/")
+#         exit(1)
+
+#     for f in glob.glob('%s/*.ld'%sys.argv[1]):
+#         print(os.path.basename(f))
+
+#         l = ldData.fromfile(f)
+#         print(l.head)
+#         print(list(map(str, l)))
+#         print()
+
+#         # create plots for all channels with the same frequency
+#         for f, g in groupby(l.channs, lambda x:x.freq):
+#             df = pd.DataFrame({i.name.lower(): i.data for i in g})
+#             df.plot()
+#             plt.show()
+
 if __name__ == '__main__':
     """ Small test of the parser.
-    
+
     Decodes all ld files in the directory. For each file, creates 
-    a plot for data with the same sample frequency.  
+    a plot for data with the same sample frequency and saves the data as CSV files.
     """
 
     import sys, os, glob
@@ -461,11 +491,11 @@ if __name__ == '__main__':
     import pandas as pd
     import matplotlib.pyplot as plt
 
-    if len(sys.argv)!=2:
+    if len(sys.argv) != 2:
         print("Usage: ldparser.py /some/path/")
         exit(1)
 
-    for f in glob.glob('%s/*.ld'%sys.argv[1]):
+    for f in glob.glob('%s/*.ld' % sys.argv[1]):
         print(os.path.basename(f))
 
         l = ldData.fromfile(f)
@@ -474,7 +504,12 @@ if __name__ == '__main__':
         print()
 
         # create plots for all channels with the same frequency
-        for f, g in groupby(l.channs, lambda x:x.freq):
-            df = pd.DataFrame({i.name.lower(): i.data for i in g})
+        for freq, group in groupby(l.channs, lambda x: x.freq):
+            df = pd.DataFrame({i.name.lower(): i.data for i in group})
             df.plot()
             plt.show()
+
+            # Save DataFrame to CSV
+            csv_filename = os.path.splitext(f)[0] + f'_freq{freq}.csv'
+            df.to_csv(csv_filename, index=False)
+            print(f'Saved data to {csv_filename}')
